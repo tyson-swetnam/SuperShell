@@ -2,7 +2,7 @@
 #hi
 init_shell() {
   #echo $$ > ~/shell/shell_pid
-  history -r ~/shell/script_history
+  history -r ~/.script_history
   trap "goodbye" SIGINT SIGTERM
   trap "remoteExecution" SIGALRM
   # trap "displayRemoteOutput" 16
@@ -26,14 +26,14 @@ init_shell() {
 }
 
 testForDate() {
-  date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M >/dev/null 2>stderr.txt 
-  err=$(cat stderr.txt)
+  date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M >/dev/null 2>/tmp/stderr.txt 
+  err=$(cat /tmp/stderr.txt)
   if [[ ${#err} != 0 ]]; then
     mac=true
   else
     mac=false
   fi
-  rm stderr.txt
+  rm /tmp/stderr.txt
 }
 # online_setup() {
 #   if [ "$online" = true ]
@@ -106,7 +106,7 @@ print_output() {
 # }
 
 goodbye (){
-   history -w ~/shell/script_history
+   history -w ~/.script_history
    # kill $(cat ~/shell/java_pipe_pid)
    # pkill -f TestSender
    # rm ~/shell/java_output
@@ -132,7 +132,7 @@ goodbye (){
 
 print_prompt() {
   dir=${PWD##*/}
-  if [ $dir = $home ]
+  if [[ ${#dir} > 0 ]] && [ $dir = $home ]
   then
     dir="~"
   fi
@@ -161,7 +161,7 @@ getdiffNew() {
   dif=$(diff tmp_old tmp_new)
   rm tmp_old
   rm tmp_new
-  rm tmp_${params[1]}
+  rm tmp_${params[1]} 2>/dev/null
 }
 
 # sendOverFile() {
@@ -197,8 +197,8 @@ testForInteractive() {
 testForFileAndLog() {
   if [[ ${params[1]} == *"."* ]] 
   then
-    cp ${params[1]} logged.txt
-    echo ${params[1]} > filename.txt
+    cp ${params[1]} /tmp/logged.txt 2>/dev/null
+    echo ${params[1]} > /tmp/filename.txt
   fi
 }
 
@@ -230,11 +230,18 @@ function abspath() {
 }
 
 ExecuteAndUpdateStats() {
-  cp ${params[1]} tmp_${params[1]}
+  cp ${params[1]} tmp_${params[1]} 2>/dev/null
   start=`date +%s`
-  old_wc_res=$(wc -lw < ${params[1]})
-  old_words=$(echo $old_wc_res | awk '{print $2}')
-  old_lines=$(echo $old_wc_res | awk '{print $1}')
+  exists=$(cat ${params[1]} 2>/dev/null)
+  if [[ ${#exists} != 0 ]]
+  then
+    old_wc_res=$(wc -lw < ${params[1]})
+    old_words=$(echo $old_wc_res | awk '{print $2}')
+    old_lines=$(echo $old_wc_res | awk '{print $1}')
+  else
+    old_words=0
+    old_lines=0
+  fi
   eval "$COMMANDS"
   new_wc_res=$(wc -lw < ${params[1]})
   new_words=$(echo $new_wc_res | awk '{print $2}')
@@ -266,25 +273,25 @@ update_stats() {
     printf '{"commands":[]}' >> "/tmp/rhistory.json"
   fi
 
-  if [ -f "logged.txt" ]; then
-   logged=$(cat logged.txt | head -1000 | sed "s/\"/\\\\\"/g")
-   rm logged.txt
+  if [ -f "/tmp/logged.txt" ]; then
+   logged=$(cat /tmp/logged.txt | head -1000 | sed "s/\"/\\\\\"/g")
+   rm /tmp/logged.txt
   else
     logged=""
   fi
 
-  if [ -f "filename.txt" ]; then
-    filename=$(cat filename.txt)
-    rm filename.txt
+  if [ -f "/tmp/filename.txt" ]; then
+    filename=$(cat /tmp/filename.txt)
+    rm /tmp/filename.txt
   else
     filename=""
   fi
 
-  if [ -f ".stdout.txt" ]; then
-    stdout=$(cat .stdout.txt | head -1000 | sed "s/\"/\\\\\"/g")
-    stderr=$(cat .stderr.txt | head -1000 | sed "s/\"/\\\\\"/g")
-    rm .stdout.txt
-    rm .stderr.txt
+  if [ -f "/tmp/stdout.txt" ]; then
+    stdout=$(cat /tmp/stdout.txt | head -1000 | sed "s/\"/\\\\\"/g")
+    stderr=$(cat /tmp/stderr.txt | head -1000 | sed "s/\"/\\\\\"/g")
+    rm /tmp/stdout.txt
+    rm /tmp/stderr.txt
   else
     stdout=""
     stderr=""
@@ -377,9 +384,9 @@ interactiveExecute() {
   testForInteractive
   if [ "$interactive" == 0 ]
   then
-    eval "$COMMANDS" > .stdout.txt 2>.stderr.txt
-    cat .stdout.txt
-    cat .stderr.txt
+    eval "$COMMANDS" > /tmp/stdout.txt 2>/tmp/stderr.txt
+    cat /tmp/stdout.txt 2>/dev/null
+    cat /tmp/stderr.txt 2>/dev/null
   else
     ExecuteAndUpdateStats
   fi
