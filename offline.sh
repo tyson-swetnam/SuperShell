@@ -26,14 +26,14 @@ init_shell() {
 }
 
 testForDate() {
-  date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M >/dev/null 2>/tmp/stderr.txt 
-  err=$(cat /tmp/stderr.txt)
+  date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M >/dev/null 2>/var/tmp/stderr.txt 
+  err=$(cat /var/tmp/stderr.txt)
   if [[ ${#err} != 0 ]]; then
     mac=true
   else
     mac=false
   fi
-  rm /tmp/stderr.txt
+  rm /var/tmp/stderr.txt
 }
 # online_setup() {
 #   if [ "$online" = true ]
@@ -41,7 +41,7 @@ testForDate() {
 #     set -m
 #     set -o emacs;
 #     bind -x '"\tc":"tab"';
-#     j_pipe=/tmp/java_pipe
+#     j_pipe=/var/tmp/java_pipe
 #     mkfifo $j_pipe
 #     cat > $j_pipe &
 #     echo $! > ~/shell/java_pipe_pid
@@ -115,7 +115,7 @@ goodbye (){
    #rm ~/shell/shell_pid
    # rm ~/shell/testCommands.txt
    # rm ~/shell/output.txt
-   rm -rf ~/shell/tmp
+   rm -rf ~/shell/var/tmp
    echo
    exit 0
 }
@@ -197,8 +197,8 @@ testForInteractive() {
 testForFileAndLog() {
   if [[ ${params[1]} == *"."* ]] 
   then
-    cp ${params[1]} /tmp/logged.txt 2>/dev/null
-    echo ${params[1]} > /tmp/filename.txt
+    cp ${params[1]} /var/tmp/logged.txt 2>/dev/null
+    echo ${params[1]} > /var/tmp/filename.txt
   fi
 }
 
@@ -256,7 +256,7 @@ ExecuteAndUpdateStats() {
 }
 
 update_stats() {
-  # DIRECTORY="/tmp$(dirname $absfilepath)"
+  # DIRECTORY="/var/tmp$(dirname $absfilepath)"
   # FILE="$(basename $absfilepath)"
   # # get directory
   # # get filename
@@ -269,29 +269,29 @@ update_stats() {
   # if [ ! -d "$FILE" ]; then
   #   touch $DIRECTORY/$FILE
   # fi
-  if [ ! -f "/tmp/rhistory.json" ]; then
-    printf '{"commands":[]}' >> "/tmp/rhistory.json"
+  if [ ! -f "/var/tmp/rhistory.json" ]; then
+    printf '{"commands":[]}' >> "/var/tmp/rhistory.json"
   fi
 
-  if [ -f "/tmp/logged.txt" ]; then
-   logged=$(cat /tmp/logged.txt | head -1000 | sed "s/\"/\\\\\"/g")
-   rm /tmp/logged.txt
+  if [ -f "/var/tmp/logged.txt" ]; then
+   logged=$(cat /var/tmp/logged.txt | head -1000 | sed "s/\"/\\\\\"/g")
+   rm /var/tmp/logged.txt
   else
     logged=""
   fi
 
-  if [ -f "/tmp/filename.txt" ]; then
-    filename=$(cat /tmp/filename.txt)
-    rm /tmp/filename.txt
+  if [ -f "/var/tmp/filename.txt" ]; then
+    filename=$(cat /var/tmp/filename.txt)
+    rm /var/tmp/filename.txt
   else
     filename=""
   fi
 
-  if [ -f "/tmp/stdout.txt" ]; then
-    stdout=$(cat /tmp/stdout.txt | head -1000 | sed "s/\"/\\\\\"/g")
-    stderr=$(cat /tmp/stderr.txt | head -1000 | sed "s/\"/\\\\\"/g")
-    rm /tmp/stdout.txt
-    rm /tmp/stderr.txt
+  if [ -f "/var/tmp/stdout.txt" ]; then
+    stdout=$(cat /var/tmp/stdout.txt | head -1000 | sed "s/\"/\\\\\"/g")
+    stderr=$(cat /var/tmp/stderr.txt | head -1000 | sed "s/\"/\\\\\"/g")
+    rm /var/tmp/stdout.txt
+    rm /var/tmp/stderr.txt
   else
     stdout=""
     stderr=""
@@ -307,26 +307,26 @@ update_stats() {
       diff_lines=$((new_lines-old_lines))
       json='{"time": "'"$ti"'", "command":"'"${params[0]}"'","filename":"'"${params[1]}"'","old_wc":'"$old_words"',"new_wc":'"$new_words"',"old_l":'"$old_lines"',"new_l":'"$new_lines"',"diff_wc":'"$diff_words"',"diff_l":'"$diff_lines"',"total_time(s)":'"$runtime"',"stdout":"'"$stdout"'","stderr":"'"$stderr"'","file":"'"$logged"'"}'
   fi
-  new_json=$(cat /tmp/rhistory.json | jq '.commands  += ['"$json"']' 2> /dev/null)
+  new_json=$(cat /var/tmp/rhistory.json | jq '.commands  += ['"$json"']' 2> /dev/null)
   if [[ ${#new_json} == 0 ]] 
   then
     return
   else 
-    echo $new_json > /tmp/rhistory.json
+    echo $new_json > /var/tmp/rhistory.json
   fi
   
   # fi
 }
 
 # remoteInteractive() {
-#   old=$(cat ./tmp/${params[1]})
+#   old=$(cat ./var/tmp/${params[1]})
 #   if [[ -z "${old// }" ]] 
 #   then
 #     echo "local host must edit or send over file to enable remote editting"
 #     return 0
 #   fi
-#   eval "${params[0]} ./tmp/${params[1]}"
-#   sendOverFile ${params[1]} ./tmp/${params[1]}
+#   eval "${params[0]} ./var/tmp/${params[1]}"
+#   sendOverFile ${params[1]} ./var/tmp/${params[1]}
 # }
 
 # executeAndSend() {
@@ -384,9 +384,9 @@ interactiveExecute() {
   testForInteractive
   if [ "$interactive" == 0 ]
   then
-    eval "$COMMANDS" > /tmp/stdout.txt 2>/tmp/stderr.txt
-    cat /tmp/stdout.txt 2>/dev/null
-    cat /tmp/stderr.txt 2>/dev/null
+    eval "$COMMANDS" > /var/tmp/stdout.txt 2>/var/tmp/stderr.txt
+    cat /var/tmp/stdout.txt 2>/dev/null
+    cat /var/tmp/stderr.txt 2>/dev/null
   else
     ExecuteAndUpdateStats
   fi
@@ -500,8 +500,8 @@ function rstats {
           esac
   done
 
-  if [ ! -f "/tmp/rhistory.json" ]; then
-    printf '{"commands":[]}' >> "/tmp/rhistory.json"
+  if [ ! -f "/var/tmp/rhistory.json" ]; then
+    printf '{"commands":[]}' >> "/var/tmp/rhistory.json"
   fi
 
   query='.commands[]'
@@ -558,7 +558,7 @@ function rstats {
       echo ":"
     fi
     echo -n "Total time: "
-    seconds=$(cat /tmp/rhistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|."total_time(s)") )')
+    seconds=$(cat /var/tmp/rhistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|."total_time(s)") )')
     minutes=$(($seconds/60))
     hours=$(($minutes/60))
     
@@ -576,21 +576,21 @@ function rstats {
     echo "$seconds seconds"
 
     echo -n "Lines of code: "
-    cat /tmp/rhistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|.diff_l ) )'
+    cat /var/tmp/rhistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|.diff_l ) )'
     echo -n "Word count: "
-    cat /tmp/rhistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|.diff_wc) )'
+    cat /var/tmp/rhistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|.diff_wc) )'
     if [[ ${#fileFlag} != 0 ]]; then
       :
     else
     echo
-    files_editted=$(cat /tmp/rhistory.json | jq '['"$query"' | .filename | select(. != "" and . != ".." and . != ".")] | unique | length')
+    files_editted=$(cat /var/tmp/rhistory.json | jq '['"$query"' | .filename | select(. != "" and . != ".." and . != ".")] | unique | length')
     echo "$files_editted files editted:"
-    cat /tmp/rhistory.json | jq '['"$query"' | .filename | select(. != "" and . != ".." and . != ".")] | unique | .[]'
+    cat /var/tmp/rhistory.json | jq '['"$query"' | .filename | select(. != "" and . != ".." and . != ".")] | unique | .[]'
   fi
   else
    echo "Your stats:"
     echo -n "Total time: "
-    seconds=$(cat /tmp/rhistory.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|."total_time(s)") )')
+    seconds=$(cat /var/tmp/rhistory.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|."total_time(s)") )')
     minutes=$(($seconds/60))
     hours=$(($minutes/60))
     
@@ -608,13 +608,13 @@ function rstats {
     echo "$seconds seconds"
 
     echo -n "Lines of code: "
-    cat /tmp/rhistory.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|.diff_l ) )'
+    cat /var/tmp/rhistory.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|.diff_l ) )'
     echo -n "Word count: "
-    cat /tmp/rhistory.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|.diff_wc) )'
+    cat /var/tmp/rhistory.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|.diff_wc) )'
     echo
-    files_editted=$(cat /tmp/rhistory.json | jq '[.commands[] | .filename | select(. != "" and . != ".." and . != ".")] | unique | length')
+    files_editted=$(cat /var/tmp/rhistory.json | jq '[.commands[] | .filename | select(. != "" and . != ".." and . != ".")] | unique | length')
     echo "$files_editted files editted:"
-    cat /tmp/rhistory.json | jq '[.commands[] | .filename | select(. != "" and . != ".." and . != ".")]  | unique | .[]'
+    cat /var/tmp/rhistory.json | jq '[.commands[] | .filename | select(. != "" and . != ".." and . != ".")]  | unique | .[]'
   fi
 }
 
@@ -648,8 +648,8 @@ function rhistory {
           esac
   done
 
-  if [ ! -f "/tmp/rhistory.json" ]; then
-    printf '{"commands":[]}' >> "/tmp/rhistory.json"
+  if [ ! -f "/var/tmp/rhistory.json" ]; then
+    printf '{"commands":[]}' >> "/var/tmp/rhistory.json"
   fi
 
   query='.commands[]'
@@ -670,9 +670,9 @@ function rhistory {
   tot=$((${#dateFlag}+${#fileNameFlag}+${#commandFlag}))
   if [[ $tot != 0 ]] 
     then
-    cat /tmp/rhistory.json | jq ' '"$query"' '
+    cat /var/tmp/rhistory.json | jq ' '"$query"' '
   else
-    cat /tmp/rhistory.json | jq
+    cat /var/tmp/rhistory.json | jq
   fi
   
   echo
