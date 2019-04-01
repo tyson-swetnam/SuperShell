@@ -26,7 +26,7 @@ init_shell() {
 }
 
 testForDate() {
-  date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M 2>stderr.txt
+  date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M >/dev/null 2>stderr.txt 
   err=$(cat stderr.txt)
   if [[ ${#err} != 0 ]]; then
     mac=true
@@ -446,7 +446,7 @@ interactiveExecute() {
 #   curr="${params[0]} ${compl_index[$choice]}"
 # }
 getDate() {
-  if [[ mac ]]; then
+  if [ "$mac" = true ]; then
     format=$1
     format=${format:0:1}
     ti=$(date -v -1$format +%F:%H:%M)
@@ -520,22 +520,14 @@ function rstats {
 
   if [[ ${#yearFlag} != 0 ]] 
   then
-    # ti=$(date -v -1y +%F:%H:%M)
-    # ti=$(date --date="${DATE} -1 year" +%Y-%m-%d:%H:%M)
     getDate year
-    query+=' | select(.time >= "'"$ti"'")'
   elif [[ ${#monthFlag} != 0 ]] 
     then
-    # ti=$(date -v -1m +%F:%H:%M)
-    # ti=$(date --date="${DATE} -1 month" +%Y-%m-%d:%H:%M)
     getDate month
-    query+=' | select(.time >= "'"$ti"'")'
   else
-    # ti=$(date -v -1w +%F:%H:%M)
-    # ti=$(date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M)
     getDate week
-    query+=' | select(.time >= "'"$ti"'")'
   fi
+  query+=' | select(.time >= "'"$ti"'")'
 
   tot=$((${#fileFlag}+${#directoryFlag}+${#yearFlag}+${#monthFlag}+${#weekFlag}))
   if [[ $tot != 0 ]] 
