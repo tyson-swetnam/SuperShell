@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 #hi
 init_shell() {
-  echo $$ > ~/shell/shell_pid
+  #echo $$ > ~/shell/shell_pid
   history -r ~/shell/script_history
   trap "goodbye" SIGINT SIGTERM
   trap "remoteExecution" SIGALRM
@@ -101,7 +101,7 @@ goodbye (){
    # rm ~/shell/java_output
    # rm $j_pipe
    # rm ~/shell/java_pipe_pid
-   rm ~/shell/shell_pid
+   #rm ~/shell/shell_pid
    # rm ~/shell/testCommands.txt
    # rm ~/shell/output.txt
    rm -rf ~/shell/tmp
@@ -270,10 +270,10 @@ update_stats() {
   fi
 
   if [ -f "stdout.txt" ]; then
-    stdout=$(cat stdout.txt | head -1000 | sed "s/\"/\\\\\"/g")
-    stderr=$(cat stderr.txt | head -1000 | sed "s/\"/\\\\\"/g")
-    rm stdout.txt
-    rm stderr.txt
+    stdout=$(cat .stdout.txt | head -1000 | sed "s/\"/\\\\\"/g")
+    stderr=$(cat .stderr.txt | head -1000 | sed "s/\"/\\\\\"/g")
+    rm .stdout.txt
+    rm .stderr.txt
   else
     stdout=""
     stderr=""
@@ -367,9 +367,9 @@ interactiveExecute() {
   testForInteractive
   if [ "$interactive" == 0 ]
   then
-    eval "$COMMANDS" > stdout.txt 2>stderr.txt
-    cat stdout.txt
-    cat stderr.txt
+    eval "$COMMANDS" > .stdout.txt 2>.stderr.txt
+    cat .stdout.txt
+    cat .stderr.txt
   else
     ExecuteAndUpdateStats
   fi
