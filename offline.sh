@@ -279,8 +279,7 @@ update_stats() {
     stderr=""
   fi
 
-  DATE=$(date +%s)
-  ti=$(date -j -f '%s' ${DATE} '+%Y-%m-%d:%H:%M')
+  ti=$(date +%F:%H:%M)
   if [ "$interactive" == 0 ]
   then
       COMMANDS=$(echo $COMMANDS | sed "s/\"/\\\\\"/g")
@@ -497,13 +496,13 @@ function rstats {
     :
   fi
 
-  DATE=$(date +%s)
-  ti=$(date -j -f '%s' ${DATE} '+%Y-%m-%d:%H:%M')
+  DATE=$(date +%F:%H:%M)
 
   if [[ ${#yearFlag} != 0 ]] 
   then
-    DATE=$(date -v -1y +%s)
-    ti=$(date -j -f '%s' ${DATE} '+%Y-%m-%d:%H:%M')
+    # DATE=$(date -v -1y +%s)
+    # ti=$(date -j -f '%s' ${DATE} '+%Y-%m-%d:%H:%M')
+    ti=$(date --date="${DATE} -${date_diff} year" +%Y-%m-%d:%H:%M)
     query+=' | select(.time >= "'"$ti"'")'
   elif [[ ${#monthFlag} != 0 ]] 
     then
