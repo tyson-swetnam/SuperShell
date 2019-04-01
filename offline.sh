@@ -496,7 +496,7 @@ function rstats {
     :
   fi
 
-  DATE=$(date +%F:%H:%M)
+  DATE=$(date +%F)
 
   if [[ ${#yearFlag} != 0 ]] 
   then
