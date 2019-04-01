@@ -500,18 +500,17 @@ function rstats {
 
   if [[ ${#yearFlag} != 0 ]] 
   then
-    # DATE=$(date -v -1y +%s)
-    # ti=$(date -j -f '%s' ${DATE} '+%Y-%m-%d:%H:%M')
-    ti=$(date --date="${DATE} -${date_diff} year" +%Y-%m-%d:%H:%M)
+    # ti=$(date -v -1y +%F:%H:%M)
+    ti=$(date --date="${DATE} -1 year" +%Y-%m-%d:%H:%M)
     query+=' | select(.time >= "'"$ti"'")'
   elif [[ ${#monthFlag} != 0 ]] 
     then
-    DATE=$(date -v -1m +%s)
-    ti=$(date -j -f '%s' ${DATE} '+%Y-%m-%d:%H:%M')
+    # ti=$(date -v -1m +%F:%H:%M)
+    ti=$(date --date="${DATE} -1 month" +%Y-%m-%d:%H:%M)
     query+=' | select(.time >= "'"$ti"'")'
   else
-    DATE=$(date -v -1w +%s)
-    ti=$(date -j -f '%s' ${DATE} '+%Y-%m-%d:%H:%M')
+    # ti=$(date -v -1w +%F:%H:%M)
+    ti=$(date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M)
     query+=' | select(.time >= "'"$ti"'")'
   fi
 
