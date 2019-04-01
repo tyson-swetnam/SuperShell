@@ -21,9 +21,20 @@ init_shell() {
   curr=""
   finished=true
   online=false
+  testForDate
   # online_setup
 }
 
+testForDate() {
+  date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M 2>stderr.txt
+  err=$(cat stderr.txt)
+  if [[ ${#err} != 0 ]]; then
+    mac=true
+  else
+    mac=false
+  fi
+  rm stderr.txt
+}
 # online_setup() {
 #   if [ "$online" = true ]
 #   then
@@ -269,7 +280,7 @@ update_stats() {
     filename=""
   fi
 
-  if [ -f "stdout.txt" ]; then
+  if [ -f ".stdout.txt" ]; then
     stdout=$(cat .stdout.txt | head -1000 | sed "s/\"/\\\\\"/g")
     stderr=$(cat .stderr.txt | head -1000 | sed "s/\"/\\\\\"/g")
     rm .stdout.txt
@@ -434,6 +445,15 @@ interactiveExecute() {
 #   # echo "you picked ${compl_index[$choice]}"
 #   curr="${params[0]} ${compl_index[$choice]}"
 # }
+getDate() {
+  if [[ mac ]]; then
+    format=$1
+    format=${format:0:1}
+    ti=$(date -v -1$format +%F:%H:%M)
+  else
+    ti=$(date --date="${DATE} -1 $1" +%Y-%m-%d:%H:%M)
+  fi
+}
 
 function rstats {
   yearFlag=""
@@ -501,16 +521,19 @@ function rstats {
   if [[ ${#yearFlag} != 0 ]] 
   then
     # ti=$(date -v -1y +%F:%H:%M)
-    ti=$(date --date="${DATE} -1 year" +%Y-%m-%d:%H:%M)
+    # ti=$(date --date="${DATE} -1 year" +%Y-%m-%d:%H:%M)
+    getDate year
     query+=' | select(.time >= "'"$ti"'")'
   elif [[ ${#monthFlag} != 0 ]] 
     then
     # ti=$(date -v -1m +%F:%H:%M)
-    ti=$(date --date="${DATE} -1 month" +%Y-%m-%d:%H:%M)
+    # ti=$(date --date="${DATE} -1 month" +%Y-%m-%d:%H:%M)
+    getDate month
     query+=' | select(.time >= "'"$ti"'")'
   else
     # ti=$(date -v -1w +%F:%H:%M)
-    ti=$(date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M)
+    # ti=$(date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M)
+    getDate week
     query+=' | select(.time >= "'"$ti"'")'
   fi
 
