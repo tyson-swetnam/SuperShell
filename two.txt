@@ -1,4 +1,0 @@
-Failed to set wall message, ignoring: The name org.freedesktop.PolicyKit1 was not provided by any .service files
-Failed to halt system via logind: The name org.freedesktop.PolicyKit1 was not provided by any .service files
-Failed to open /dev/initctl: Permission denied
-Failed to talk to init daemon.

@@ -1,7 +1,0 @@
-Script started on 2019-04-02 04:00:35+0000
-hi wassup
-vagrant:~ vagrant$ script w   -c ""e"c"h"o" "h"i"
-vagrant:~ vagrant$ script -c "echo hi" sup^C
-]0;vagrant@vagrant: ~/SuperShell[01;32mvagrant@vagrant[00m:[01;34m~/SuperShell[00m$ exit
-
-Script done on 2019-04-02 04:00:57+0000
