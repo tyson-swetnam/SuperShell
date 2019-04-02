@@ -385,10 +385,18 @@ interactiveExecute() {
   testForInteractive
   if [ "$interactive" == 0 ]
   then
-    eval "$COMMANDS" | tee /var/tmp/stdout.txt
+    #stdbuf -o 0 "$COMMANDS" | tee stdout.txt
+    if [ "${params[0]}" = "cd" ]; then
+        eval "$COMMANDS" > /var/tmp/stdout.txt 2>/var/tmp/stderr.txt
+    else
+        script -q -c "$COMMANDS 2>one.txt" -f /dev/null | tee /var/tmp/stdout.txt
+    mv one.txt two.txt
+    fi 
+    #    eval "$COMMANDS" > /var/tmp/stdout.txt 
+    #| tee /var/tmp/stdout.txt
     #eval "$COMMANDS" 2>/var/tmp/stderr.txt
     #cat /var/tmp/stdout.txt 2>/dev/null
-    # cat /var/tmp/stderr.txt 2>/dev/null
+    #cat /var/tmp/stderr.txt 2>/dev/null
   else
     ExecuteAndUpdateStats
   fi
