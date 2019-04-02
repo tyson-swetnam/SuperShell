@@ -1,0 +1,2 @@
+Enter radius (in cm):
+Circle's area is 506.71 (sq in).
