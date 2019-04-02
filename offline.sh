@@ -289,9 +289,10 @@ update_stats() {
 
   if [ -f "/var/tmp/stdout.txt" ]; then
     stdout=$(cat /var/tmp/stdout.txt | head -1000 | sed "s/\"/\\\\\"/g")
-    stderr=$(cat /var/tmp/stderr.txt | head -1000 | sed "s/\"/\\\\\"/g")
+    stderr=""
+    # stderr=$(cat /var/tmp/stderr.txt | head -1000 | sed "s/\"/\\\\\"/g")
     rm /var/tmp/stdout.txt
-    rm /var/tmp/stderr.txt
+    # rm /var/tmp/stderr.txt
   else
     stdout=""
     stderr=""
@@ -384,9 +385,10 @@ interactiveExecute() {
   testForInteractive
   if [ "$interactive" == 0 ]
   then
-    eval "$COMMANDS" > /var/tmp/stdout.txt 2>/var/tmp/stderr.txt
-    cat /var/tmp/stdout.txt 2>/dev/null
-    cat /var/tmp/stderr.txt 2>/dev/null
+    eval "$COMMANDS" | tee /var/tmp/stdout.txt
+    #eval "$COMMANDS" 2>/var/tmp/stderr.txt
+    #cat /var/tmp/stdout.txt 2>/dev/null
+    # cat /var/tmp/stderr.txt 2>/dev/null
   else
     ExecuteAndUpdateStats
   fi
