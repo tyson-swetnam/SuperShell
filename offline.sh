@@ -8,20 +8,22 @@ init_shell() {
   host=$(hostname -s)
   user=$(whoami)
   curr=""
+  cat $HOME/SuperShell/title.txt
+  d=$(date +%Y-%m-%d)
   testForDate
 }
 
 # test to see if on mac or linux system
 # this date format fails on mac so if any errors then on mac.
 testForDate() {
-  date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M >/dev/null 2>/var/tmp/stderr.txt 
-  err=$(cat /var/tmp/stderr.txt)
+  date --date="${DATE} -1 week" +%Y-%m-%d:%H:%M >/dev/null 2>$HOME/SuperShellLogs/stdout.txt 
+  err=$(cat $HOME/SuperShellLogs/stdout.txt)
   if [[ ${#err} != 0 ]]; then
     mac=true
   else
     mac=false
   fi
-  rm /var/tmp/stderr.txt
+  rm $HOME/SuperShellLogs/stdout.txt
 }
 
 # saves history file and exits program
@@ -45,11 +47,7 @@ print_prompt() {
 # test to see if command is a screen based editor
 # set interactivet to 1 if true, 0 if false
 testForInteractive() {
-  if [ ${params[0]} = "vim" ] || 
-    [ ${params[0]} = "vi" ] || 
-    [ ${params[0]} = "pico" ] ||
-    [ ${params[0]} = "nano" ] || 
-    [ ${params[0]} = "emacs" ]
+  if grep -c ${params[0]} $HOME/interactive.txt > 0
   then
     interactive=1
   else 
@@ -61,8 +59,8 @@ testForInteractive() {
 testForFileAndLog() {
   if [[ ${params[1]} == *"."* ]] 
   then
-    cp ${params[1]} /var/tmp/logged.txt 2>/dev/null
-    echo ${params[1]} > /var/tmp/filename.txt
+    cp ${params[1]} $HOME/SuperShellLogs/logged.txt 2>/dev/null
+    echo ${params[1]} > $HOME/SuperShellLogs/filename.txt
   fi
 }
 
@@ -92,29 +90,29 @@ ExecuteAndUpdateStats() {
 
 # update rhistory with info on current command
 update_stats() {
-  if [ ! -f "/var/tmp/SuperShellHistory.json" ]; then
-    printf '{"commands":[]}' >> "/var/tmp/SuperShellHistory.json"
+  if [ ! -f "$HOME/SuperShellHistory/SuperShellHistory-${d}.json" ]; then
+    printf '{"commands":[]}' >> "$HOME/SuperShellHistory/SuperShellHistory-${d}.json"
   fi
 
-  if [ -f "/var/tmp/logged.txt" ]; then
-   logged=$(cat /var/tmp/logged.txt | head -1000 | sed "s/\"/\\\\\"/g")
-   rm /var/tmp/logged.txt
+  if [ -f "$HOME/SuperShellLogs/logged.txt" ]; then
+   logged=$(cat $HOME/SuperShellLogs/logged.txt | head -1000 | sed "s/\"/\\\\\"/g")
+   rm $HOME/SuperShellLogs/logged.txt
   else
     logged=""
   fi
 
-  if [ -f "/var/tmp/filename.txt" ]; then
-    filename=$(cat /var/tmp/filename.txt)
-    rm /var/tmp/filename.txt
+  if [ -f "$HOME/SuperShellLogs/filename.txt" ]; then
+    filename=$(cat $HOME/SuperShellLogs/filename.txt)
+    rm $HOME/SuperShellLogs/filename.txt
   else
     filename=""
   fi
 
-  if [ -f "/var/tmp/stdout.txt" ]; then
-    stdout=$(cat /var/tmp/stdout.txt | head -1000 | sed "s/\"/\\\\\"/g")
-    stderr=$(cat /var/tmp/stderr.txt | head -1000 | sed "s/\"/\\\\\"/g")
-    rm /var/tmp/stdout.txt
-    rm /var/tmp/stderr.txt
+  if [ -f "$HOME/SuperShellLogs/stdout.txt" ]; then
+    stdout=$(cat $HOME/SuperShellLogs/stdout.txt | head -1000 | sed "s/\"/\\\\\"/g")
+    stderr=$(cat $HOME/SuperShellLogs/stdout.txt | head -1000 | sed "s/\"/\\\\\"/g")
+    rm $HOME/SuperShellLogs/stdout.txt
+    rm $HOME/SuperShellLogs/stdout.txt
   else
     stdout=""
     stderr=""
@@ -130,12 +128,12 @@ update_stats() {
       diff_lines=$((new_lines-old_lines))
       json='{"time": "'"$ti"'", "command":"'"${params[0]}"'","filename":"'"${params[1]}"'","old_wc":'"$old_words"',"new_wc":'"$new_words"',"old_l":'"$old_lines"',"new_l":'"$new_lines"',"diff_wc":'"$diff_words"',"diff_l":'"$diff_lines"',"total_time(s)":'"$runtime"',"stdout":"'"$stdout"'","stderr":"'"$stderr"'","file":"'"$logged"'"}'
   fi
-  new_json=$(cat /var/tmp/SuperShellHistory.json | jq '.commands  += ['"$json"']' 2> /dev/null)
+  new_json=$(cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq '.commands  += ['"$json"']' 2> /dev/null)
   if [[ ${#new_json} == 0 ]] 
   then
     return
   else 
-    echo $new_json > /var/tmp/SuperShellHistory.json
+    echo $new_json > $HOME/SuperShellHistory/SuperShellHistory-${d}.json
   fi
 }
 
@@ -161,18 +159,18 @@ interactiveExecute() {
   if [ "$interactive" == 0 ]
   then
     if [ "${params[0]}" = "cd" ] || [ "${params[0]}" = "exit" ]; then
-        eval "$COMMANDS" > /var/tmp/stdout.txt 2>/var/tmp/stderr.txt
+        eval "$COMMANDS" > $HOME/SuperShellLogs/stdout.txt 2>$HOME/SuperShellLogs/stdout.txt
     else
       # NOTE: This needs to be changed. This causes output of a program
       # to not get printed out until all input is received. This is due
       # to the stderr redirection. Can be solved on linux machines with
       # the commented out script command below. Should be relatively simple
       # to port to mac.
-      eval "$COMMANDS" > /var/tmp/stdout.txt 2>/var/tmp/stderr.txt
-   # script -q -c "$COMMANDS 2>/var/tmp/stderr.txt" -f /dev/null | tee       /var/tmp/stdout.txt
+      eval "$COMMANDS" > $HOME/SuperShellLogs/stdout.txt 2>$HOME/SuperShellLogs/stdout.txt
+   # script -q -c "$COMMANDS 2>$HOME/SuperShellLogs/stdout.txt" -f /dev/null | tee       $HOME/SuperShellLogs/stdout.txt
     fi 
-    cat /var/tmp/stdout.txt 2>/dev/null
-    cat /var/tmp/stderr.txt 2>/dev/null
+    cat $HOME/SuperShellLogs/stdout.txt 2>/dev/null
+    cat $HOME/SuperShellLogs/stdout.txt 2>/dev/null
   else
     ExecuteAndUpdateStats
   fi
@@ -229,9 +227,10 @@ function rstats {
                    ;;
           esac
   done
-
-  if [ ! -f "/var/tmp/SuperShellHistory.json" ]; then
-    printf '{"commands":[]}' >> "/var/tmp/SuperShellHistory.json"
+  
+  jq -s 'reduce .[] as $item ({}; . * $item)' $HOME/SuperShellHistory/*.json > $HOME/SuperShellHistory/SuperShellHistory.json
+  if [ ! -f "$HOME/SuperShellHistory/SuperShellHistory.json" ]; then
+    printf '{"commands":[]}' >> "$HOME/SuperShellHistory/SuperShellHistory.json"
   fi
 
   query='.commands[]'
@@ -287,7 +286,7 @@ function rstats {
       echo ":"
     fi
     echo -n "Total time: "
-    seconds=$(cat /var/tmp/SuperShellHistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|."total_time(s)") )')
+    seconds=$(cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|."total_time(s)") )')
     minutes=$(($seconds/60))
     hours=$(($minutes/60))
     
@@ -305,21 +304,21 @@ function rstats {
     echo "$seconds seconds"
 
     echo -n "Lines of code: "
-    cat /var/tmp/SuperShellHistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|.diff_l ) )'
+    cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|.diff_l ) )'
     echo -n "Word count: "
-    cat /var/tmp/SuperShellHistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|.diff_wc) )'
+    cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|.diff_wc) )'
     if [[ ${#fileFlag} != 0 ]]; then
       :
     else
     echo
-    files_editted=$(cat /var/tmp/SuperShellHistory.json | jq '['"$query"' | .filename | select(. != "" and . != ".." and . != ".")] | unique | length')
+    files_editted=$(cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq '['"$query"' | .filename | select(. != "" and . != ".." and . != ".")] | unique | length')
     echo "$files_editted files editted:"
-    cat /var/tmp/SuperShellHistory.json | jq '['"$query"' | .filename | select(. != "" and . != ".." and . != ".")] | unique | .[]'
+    cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq '['"$query"' | .filename | select(. != "" and . != ".." and . != ".")] | unique | .[]'
   fi
   else
    echo "Your stats:"
     echo -n "Total time: "
-    seconds=$(cat /var/tmp/SuperShellHistory.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|."total_time(s)") )')
+    seconds=$(cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|."total_time(s)") )')
     minutes=$(($seconds/60))
     hours=$(($minutes/60))
     
@@ -337,13 +336,13 @@ function rstats {
     echo "$seconds seconds"
 
     echo -n "Lines of code: "
-    cat /var/tmp/SuperShellHistory.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|.diff_l ) )'
+    cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|.diff_l ) )'
     echo -n "Word count: "
-    cat /var/tmp/SuperShellHistory.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|.diff_wc) )'
+    cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|.diff_wc) )'
     echo
-    files_editted=$(cat /var/tmp/SuperShellHistory.json | jq '[.commands[] | .filename | select(. != "" and . != ".." and . != ".")] | unique | length')
-    echo "$files_editted files editted:"
-    cat /var/tmp/SuperShellHistory.json | jq '[.commands[] | .filename | select(. != "" and . != ".." and . != ".")]  | unique | .[]'
+    files_edited=$(cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq '[.commands[] | .filename | select(. != "" and . != ".." and . != ".")] | unique | length')
+    echo "$files_edited files edited:"
+    cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq '[.commands[] | .filename | select(. != "" and . != ".." and . != ".")]  | unique | .[]'
   fi
 }
 
@@ -378,8 +377,8 @@ function rhistory {
           esac
   done
 
-  if [ ! -f "/var/tmp/SuperShellHistory.json" ]; then
-    printf '{"commands":[]}' >> "/var/tmp/SuperShellHistory.json"
+  if [ ! -f "$HOME/SuperShellHistory/SuperShellHistory-${d}.json" ]; then
+    printf '{"commands":[]}' >> "$HOME/SuperShellHistory/SuperShellHistory-${d}.json"
   fi
 
   query='.commands[]'
@@ -397,14 +396,45 @@ function rhistory {
     then
     query+=' | select(.time >= "'"$dateFlag"'")'
   fi
-  tot=$((${#dateFlag}+${#fileNameFlag}+${#commandFlag}))
   if [[ $tot != 0 ]] 
     then
-    cat /var/tmp/SuperShellHistory.json | jq ' '"$query"' '
+      if [[ ${#dateFlag} != 0 ]] 
+      then
+  #because Mac dates are formatted differently...
+        if [ "$mac" = true ]; then
+          currentDateTs=$(date -j -f "%Y-%m-%d" $dateFlag "+%s")
+          # echo "$currentDateTs"
+          endDateTs=$(date -j -f "%Y-%m-%d" $d "+%s")
+          offset=86400
+          gzip $HOME/SuperShellHistory/SuperShellHistory-${d}.json
+          while [ "$currentDateTs" -le "$endDateTs" ]
+          do
+            date=$(date -j -f "%s" $currentDateTs "+%Y-%m-%d")
+            gzip -d $HOME/SuperShellHistory/SuperShellHistory-${date}.json.gz
+            cat $HOME/SuperShellHistory/SuperShellHistory-${date}.json | jq ' '"$query"' '
+            currentDateTs=$(($currentDateTs+$offset))
+            gzip -f $HOME/SuperShellHistory/SuperShellHistory-${date}.json
+          done
+        else
+          currentdate=$dateFlag
+          endDate=$(/bin/date --date "$d 1 day" +%Y-%m-%d)
+          gzip $HOME/SuperShellHistory/SuperShellHistory-${d}.json
+          until [ "$currentdate" == "$endDate" ]
+          do
+            gzip -d $HOME/SuperShellHistory/SuperShellHistory-${currentdate}.json.gz
+            cat $HOME/SuperShellHistory/SuperShellHistory-${currentdate}.json | jq ' '"$query"' '
+            gzip -f $HOME/SuperShellHistory/SuperShellHistory-${currentdate}.json
+            currentdate=$(/bin/date --date "$currentdate 1 day" +%Y-%m-%d)
+          done
+        fi
+      else
+        cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq ' '"$query"' '
+        gzip -f $HOME/SuperShellHistory/SuperShellHistory-${d}.json
+      fi
   else
-    cat /var/tmp/SuperShellHistory.json | jq
+    cat $HOME/SuperShellHistory/SuperShellHistory-${d}.json | jq
+    gzip -f $HOME/SuperShellHistory/SuperShellHistory-${d}.json
   fi
-  
   echo
 }
 
