@@ -69,14 +69,6 @@ print_prompt() {
 # test to see if command is a screen based editor
 # set interactivet to 1 if true, 0 if false
 testForInteractive() {
-  # echo "is  ${params[0]}  interactive?" 
-  # if [ ${params[0]} = "vim" ] || 
-  #   [ ${params[0]} = "vi" ] || 
-  #   [ ${params[0]} = "pico" ] ||
-  #   [ ${params[0]} = "nano" ] || 
-  #   [ ${params[0]} = "emacs" ] ||
-  #   [ ${params[0]} = "jupyter" ] ||
-  #   [ ${params[0]} = "ssh" ]
   if grep -c ${params[0]} $HOME/.interactive.txt > 0
   then
     interactive=1
@@ -277,6 +269,8 @@ function rstats {
   #   gzip -d $f
   #   # echo "$f" ; 
   # done
+  # jq -s '.' $HOME/SuperShellHistory/*.json > $HOME/SuperShellHistory/output.json
+  # jq -s '.' $HOME/SuperShellHistory/*.json > $HOME/SuperShellHistory/SuperShellHistory.json 
   jq -s 'reduce .[] as $item ({}; . * $item)' $HOME/SuperShellHistory/*.json > $HOME/SuperShellHistory/SuperShellHistory.json
   if [ ! -f "$HOME/SuperShellHistory/SuperShellHistory.json" ]; then
     printf '{"commands":[]}' >> "$HOME/SuperShellHistory/SuperShellHistory.json"
@@ -286,7 +280,6 @@ function rstats {
   if [[ ${#fileFlag} != 0 ]] 
   then
     query+=' | select(.filename == "'"$fileFlag"'")'
-    echo $query
   elif [[ ${#directoryFlag} != 0 ]] 
     then
     pushd "$directoryFlag" > /dev/null
@@ -313,7 +306,7 @@ function rstats {
     getDate week
   fi
   query+=' | select(.time >= "'"$ti"'")'
-
+  # echo $query
   tot=$((${#fileFlag}+${#directoryFlag}+${#yearFlag}+${#monthFlag}+${#weekFlag}))
   if [[ $tot != 0 ]] 
     then
@@ -334,6 +327,7 @@ function rstats {
     else
       echo ":"
     fi
+    echo "Query " $query
     echo -n "Total time: "
     seconds=$(cat $HOME/SuperShellHistory/SuperShellHistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|."total_time(s)") )')
     minutes=$(($seconds/60))
@@ -468,8 +462,10 @@ function rhistory {
           do
             date=$(date -j -f "%s" $currentDateTs "+%Y-%m-%d")
             # gzip -d $HOME/SuperShellHistory/SuperShellHistory-${date}.json.gz
-            cat $HOME/SuperShellHistory/SuperShellHistory-${date}.json | jq ' '"$query"' '
-            currentDateTs=$(($currentDateTs+$offset))
+            if [ -f "$HOME/SuperShellHistory/SuperShellHistory-${date}.json" ]; then
+    			cat $HOME/SuperShellHistory/SuperShellHistory-${date}.json | jq ' '"$query"' '
+  			fi
+  			currentDateTs=$(($currentDateTs+$offset))
             # gzip -f $HOME/SuperShellHistory/SuperShellHistory-${date}.json
           done
         else
@@ -478,8 +474,11 @@ function rhistory {
           # gzip $HOME/SuperShellHistory/SuperShellHistory-${d}.json
           until [ "$currentdate" == "$endDate" ]
           do
+          	if [ -f "$HOME/SuperShellHistory/SuperShellHistory-${currentdate}.json" ]; then
+    			cat $HOME/SuperShellHistory/SuperShellHistory-${currentdate}.json | jq ' '"$query"' '
+            	currentDateTs=$(($currentDateTs+$offset))
+  			fi
             # gzip -d $HOME/SuperShellHistory/SuperShellHistory-${currentdate}.json.gz
-            cat $HOME/SuperShellHistory/SuperShellHistory-${currentdate}.json | jq ' '"$query"' '
             # gzip -f $HOME/SuperShellHistory/SuperShellHistory-${currentdate}.json
             currentdate=$(/bin/date --date "$currentdate 1 day" +%Y-%m-%d)
           done
