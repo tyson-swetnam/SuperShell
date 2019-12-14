@@ -54,19 +54,29 @@ SuperShell is running when opening a new bash window displays the banner:
 
 Default command shows history of commands for the current day.
 
+![rhistorydefault](https://github.com/SaumyashreeRay/SuperShell/blob/master/images/rhistory-default.png)
+
 There are a few options for this command.
 
-Here are some ways this command can be used:
+![rhistoryoptions](https://github.com/SaumyashreeRay/SuperShell/blob/master/images/rhistory-options.png)
 
+Here are some more ways this command can be used:
+
+* This command uses two flags to better search the history logs.
+![rhistorydoubleflag](https://github.com/SaumyashreeRay/SuperShell/blob/master/images/rhistory-doubleflag.png)
+
+* This is a short example of a hello world python program that introduces an error.
+![rhistorypythonexample](https://github.com/SaumyashreeRay/SuperShell/blob/master/images/helloword-python-example.png)
 
 ## rstats
 
 Default command shows stats of commands for the current day.
 
+![rstatsdefault](https://github.com/SaumyashreeRay/SuperShell/blob/master/images/default-rstats.png)
+
 There are a few options for this command.
 
-Here are some ways this command can be used:
-
+![rstatsoptions](https://github.com/SaumyashreeRay/SuperShell/blob/master/images/rstats-options.png)
 
 
 ## rhelp (in progress)
