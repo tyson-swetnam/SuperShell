@@ -1,58 +1,70 @@
 # Overview of files:
 
-shell.sh - online shell of user one
+* shell.sh - online shell of user one
 
-shell2.sh - online shell of user two
+* shell2.sh - online shell of user two
 
-TestSender.jar - jar used in shell.sh
+* TestSender.jar - jar used in shell.sh
 
-TestSender2.jar - jar used in shell2.sh
+* TestSender2.jar - jar used in shell2.sh
 
-offline_with_online.sh - offline shell with online component commented out
+* offline_with_online.sh - offline shell with online component commented out
 
-offline.sh - offline shell (no online component)
+* offline.sh - offline shell (no online component)
 
-install.sh - install script for offline shell
+* install.sh - install script for offline shell
 
 # Initial Setup
-•	git clone https://github.com/SaumyashreeRay/SuperShell.git
 
-•	cd into directory “SuperShell”
+## Installation 
 
-•	depending on OS, run the following command
+* git clone https://github.com/SaumyashreeRay/SuperShell.git
 
-    bash mac_install.sh (need to have brew installed)
+* cd into directory “SuperShell”
+
+* depending on OS, run the following command
     
-    bash linux_install.sh
+    * bash mac_install.sh (need to have brew installed)
     
-•	follow prompts for consent (y to install)
+    * bash linux_install.sh
+    
+* follow prompts for consent (y to install)
 
-•	restart bash or open a new bash window for offline SuperShell shell to be activated
+* restart bash or open a new bash window for offline SuperShell shell to be activated
 
 SuperShell is running when opening a new bash window displays the banner:
 
+![supershellbanner](https://github.com/SaumyashreeRay/SuperShell/blob/master/images/opening-banner.png)
+
+## Interactive commands
+
+Commands that "take over" the display of the shell must be designated as an interactive command. The command 
+
+    bash add_interactive.sh <command_name>
+
+adds the parameter given to a list of interactive commands like pico, nano, vi, jupyter, etc.
 
 # Enable/Disable SuperShell
 
 ## Disable Shell
-•	open .bash_profile
+* open .bash_profile
 
-•	comment/remove "bash ~/.offline.sh"
+* comment/remove "bash ~/.offline.sh"
 
-•	comment/remove "exit"
+* comment/remove "exit"
 
 ## Enable Shell
-•	open .bash_profile
+* open .bash_profile
 
-•	uncomment/add "bash ~/.offline.sh"
+* uncomment/add "bash ~/.offline.sh"
 
-•	uncomment/add "exit"
+* uncomment/add "exit"
 
 # Special Commands
 
 ## rhistory
 
-Default command shows history of commands for the current day.
+This command allows a user to view their command history in json format, and allows for filtering based on date, command, and file. By default, the command shows the history of commands for the current day.
 
 ![rhistorydefault](https://github.com/SaumyashreeRay/SuperShell/blob/master/images/rhistory-default.png)
 
@@ -68,17 +80,24 @@ Here are some more ways this command can be used:
 * This is a short example of a hello world python program that introduces an error.
 ![rhistorypythonexample](https://github.com/SaumyashreeRay/SuperShell/blob/master/images/helloword-python-example.png)
 
+History for each day is stored in separate json files with the naming convention 
+    
+    SuperShellHistory-YYYY-MM-DD.json
+
+The standard output is limited to the first 1000 lines. 
+
 ## rstats
 
-Default command shows stats of commands for the current day.
+This command gives the user a more detailed look at their history. It shows the time spent coding, the number of lines  and words changed, and how many files were edited. By default, this command shows stats of commands for the current day.
 
 ![rstatsdefault](https://github.com/SaumyashreeRay/SuperShell/blob/master/images/default-rstats.png)
 
-There are a few options for this command.
+There are a few more options (weekly, monthly, yearly) for this command.
 
 ![rstatsoptions](https://github.com/SaumyashreeRay/SuperShell/blob/master/images/rstats-options.png)
 
 
 ## rhelp (in progress)
 
+This command (still in progress) is being designed to suggest fixes to common errors a user might encounter within the shell.
 
