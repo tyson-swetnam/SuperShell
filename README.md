@@ -29,6 +29,10 @@
     
     * bash linux_install.sh
     
+    * bash windows_install.sh (need to have [chocolatey](https://chocolatey.org/install) installed)
+        
+        This version is a bit buggy
+    
 * follow prompts for consent (y to install)
 
 * restart bash or open a new bash window for offline SuperShell shell to be activated
