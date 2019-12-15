@@ -31,7 +31,7 @@
     
     * bash windows_install.sh (need to have [chocolatey](https://chocolatey.org/install) installed)
         
-        This version is a bit buggy
+        Note: This version is a bit buggy
     
 * follow prompts for consent (y to install)
 
