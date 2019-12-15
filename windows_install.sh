@@ -15,7 +15,7 @@ while :
        echo "Unrecognized input. Please use y/n."
    fi
 done
-# sudo apt-get install jq
+choco install jq
 cp offline.sh ~/.offline.sh
 cp interactive.txt ~/.interactive.txt
 echo "bash ~/.offline.sh" >> ~/.bash_profile
