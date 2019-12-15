@@ -25,7 +25,7 @@
 
 * depending on OS, run the following command
     
-    * bash mac_install.sh (need to have brew installed)
+    * bash mac_install.sh (need to have [brew](https://brew.sh) installed)
     
     * bash linux_install.sh
     
