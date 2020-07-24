@@ -1,8 +1,0 @@
-Your weekly stats:
-Total time: 3 minutes 39 seconds
-Lines of code: 2
-Word count: 11
-
-6 files edited:
-
-18 unique commands:

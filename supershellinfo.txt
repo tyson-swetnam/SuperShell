@@ -1,0 +1,43 @@
+**************************************************************************************************************
+SuperShell is a tool to help programmers using a shell.
+
+Special commands are
+
+* sinfo
+	
+
+* shistory
+	The shistory command allows users to view their detailed command history stored in JSON format. This history allows for filtering based on date, command, and filename. The history for each day is stored in its own JSON file, and all JSON history files are located in the SuperShellHistory directory.
+
+	The default time range (no flags) displays the entire history log
+	
+	Usage:  shistory [-f filename] [-c command] [-d start_date]
+		start_date format: YYYY[-MM[-DD]]
+
+* sstats
+	The sstats command uses the data stored in shistory logs to display statistics about a file or directory within a specified timeperiod (week, month, or year). It shows time spent coding, the number of lines and words changed, how many files were edited, and five selected unique commands
+	
+	By default, this command shows stats of commands for the current week.
+
+	Usage: sstats [ -w | -m | -y] [-f filename | -d directory_name] [-s start_date]
+	start_date format: YYYY[-MM[-DD]]
+
+* sundo
+	The sundo command can show a number of previous versions of an edited file. This will allow users to recover deleted files or restore a previous version of a file.
+
+	Usage: sundo [-f filename] [-n number of versions]
+
+* shelp
+	The shelp (SuperShell help) command suggests reasons for errors and possible solutions to resolve the detected errors.
+
+	After an error is detected, a prompt will be shown to enter 'shelp.' This will shows a list of numbered suggestions based on rules defined in the directory SuperShelRules
+
+	Automatic SuperShell help can be enabled or disabled by entering the enablehelp or disablehelp command.
+
+Interactive commands can be added by entering
+
+	bash add_interactive.sh <new command>
+
+The intro message listing statistics for a time period can be changed by editing StatParam/welcomestatparam.txt
+
+**************************************************************************************************************
