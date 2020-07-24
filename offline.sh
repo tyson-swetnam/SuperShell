@@ -321,7 +321,7 @@ interactiveExecute() {
     if [ "$sshelp" == 1 ]; then
       recommend
     else
-      cat $HOME/supershellhelpmessage.txt
+      cat $HOME/.supershellhelpmessage.txt
     fi
   fi
   
@@ -534,6 +534,185 @@ function sstats {
   # echo "Compressing files..."
   # compress
   # rm $HOME/SuperShellHistory/SuperShellHistory.json 
+}
+
+function welcome_stats {
+  yearFlag=""
+  monthFlag=""
+  weekFlag=""
+  fileFlag=""
+  directoryFlag=""
+  while test $# -gt 0; do
+           case "$1" in
+                -y)
+                    yearFlag=true
+                    shift
+                    ;;
+                -w)
+                    weekFlag=true
+                    shift
+                    ;;
+                -m)
+                    monthFlag=true
+                    shift
+                    ;;
+                -f)
+                    shift
+                    fileFlag=$1
+                    shift
+                    ;;
+                -d)
+                    shift
+                    directoryFlag=$1
+                    shift
+                    ;;
+                -s)
+                    shift
+                    dateFlag=$1
+                    shift
+                    ;;
+                *)
+                   echo "$1 is not a recognized flag!"
+                   echo "Useage: sstats [ -w | -m | -y] [-f filename | -d directory_name] [-s start_date]"
+                   echo "start_date format: YYYY[-MM[-DD]]"
+                   return 1;
+                   ;;
+          esac
+  done
+
+  jq -s '{ commands: map(.commands[]) }' $HOME/SuperShell/SuperShellHistory/SuperShellHistory-*.json > $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json 
+  if [ ! -f "$HOME/SuperShell/SuperShellHistory/SuperShellHistory.json" ]; then
+    printf '{"commands":[]}' >> "$HOME/SuperShell/SuperShellHistory/SuperShellHistory.json"
+  fi
+
+  query='.commands[]'
+  if [[ ${#fileFlag} != 0 ]] 
+  then
+    query+=' | select(.filename == "'"$fileFlag"'")'
+  elif [[ ${#directoryFlag} != 0 ]] 
+    then
+    pushd "$directoryFlag" > /dev/null
+    query+=' | select(.filename == "default" '
+    for f in *
+    do
+        query+='or .filename == "'"$f"'" '
+    done
+    popd > /dev/null
+    query+=')'
+  else
+    :
+  fi
+
+  DATE=$(date +%F)
+  echo "*********************************************************"
+  if [[ ${#yearFlag} != 0 ]] 
+  then
+    getDate year
+  elif [[ ${#monthFlag} != 0 ]] 
+    then
+    getDate month
+  elif [[ ${#dateFlag} != 0 ]] 
+    then 
+      ti=$dateFlag
+  else
+    getDate week
+  fi
+  query+=' | select(.time >= "'"$ti"'")'
+  # echo $query
+  tot=$((${#fileFlag}+${#directoryFlag}+${#yearFlag}+${#monthFlag}+${#weekFlag}+${#dateFlag}))
+  if [[ $tot != 0 ]] 
+    then
+    echo -n "Your Supershell Stats "
+    
+    if [[ ${#yearFlag} != 0 ]]; then
+      echo -n "this year"
+    elif [[ ${#monthFlag} != 0 ]]; then
+      echo -n "this month"
+    elif [[ ${#weekFlag} != 0 ]]; then
+      echo -n "this week"
+    else
+      echo -n "since " $dateFlag
+    fi
+
+    if [[ ${#fileFlag} != 0 ]]; then
+      echo " for file $fileFlag:"
+    elif [[ ${#directoryFlag} != 0 ]]; then
+      echo " for directory $directoryFlag:"
+    else
+      echo ":"
+    fi
+    # echo "Query " $query
+    echo -n "Total time: "
+    seconds=$(cat $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|."total_time(s)") )')
+    minutes=$(($seconds/60))
+    hours=$(($minutes/60))
+    
+    seconds=$(($seconds%60))
+    minutes=$(($minutes%60))
+
+    if [[ $hours != 0 ]]; then
+      echo -n "$hours hours "
+    fi
+
+    if [[ $minutes != 0 ]]; then
+      echo -n "$minutes minutes "
+    fi
+
+    echo "$seconds seconds"
+
+    echo -n "Lines of code: "
+    cat $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|.diff_l ) )'
+    echo -n "Word count: "
+    cat $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '['"$query"'] | reduce .[] as $row (0; . + ($row|.diff_wc) )'
+    if [[ ${#fileFlag} != 0 ]]; then
+      :
+    else
+    echo
+    files_edited=$(cat $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '['"$query"' | .filename | select(. != "" and . != ".." and . != ".")] | unique | length')
+    echo "$files_edited files edited:"
+    cat $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '['"$query"' | .filename | select(. != "" and . != ".." and . != ".")] | unique | .[]'
+    echo
+    unique_commands=$(cat $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '['"$query"' | .full_command | select(. != "" and . != ".." and . != ".")] | unique | length')
+    echo "$unique_commands unique commands:"
+    cat $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '['"$query"' | .full_command | select(. != "" and . != ".." and . != ".")] | unique | .[]'
+  fi
+  else
+   echo "Your stats:"
+    echo -n "Total time: "
+    seconds=$(cat $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|."total_time(s)") )')
+    minutes=$(($seconds/60))
+    hours=$(($minutes/60))
+    
+    seconds=$(($seconds%60))
+    minutes=$(($minutes%60))
+
+    if [[ $hours != 0 ]]; then
+      echo -n "$hours hours "
+    fi
+
+    if [[ $minutes != 0 ]]; then
+      echo -n "$minutes minutes "
+    fi
+
+    echo "$seconds seconds"
+    echo -n "commands :  "
+
+    echo -n "Lines of code: "
+    cat $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|.diff_l ) )'
+    echo -n "Word count: "
+    cat $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '[.commands[]] | reduce .[] as $row (0; . + ($row|.diff_wc) )'
+    echo
+    files_edited=$(cat $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '[.commands[] | .filename | select(. != "" and . != ".." and . != ".")] | unique | length')
+    echo "$files_edited files edited:"
+    cat /$HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '[.commands[] | .filename | select(. != "" and . != ".." and . != ".")]  | unique | .[]'
+    echo
+    unique_commands=$(cat $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json | jq '['"$query"' | .command | select(. != "" and . != ".." and . != ".")] | unique | length')
+    echo "$unique_commands unique commands:"  
+  fi
+  # echo "Compressing files..."
+  # compress
+  rm $HOME/SuperShell/SuperShellHistory/SuperShellHistory.json 
+  echo "*********************************************************"
 }
 
 # Show users their super shell history
