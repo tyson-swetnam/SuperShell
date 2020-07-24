@@ -309,7 +309,7 @@ interactiveExecute() {
   fi
   testForFileAndLog
   update_stats
-  if grep -c "YES" $HOME/supershellhelp.txt > 0 
+  if grep -c "YES" $HOME/.supershellhelp.txt > 0 
   then
     sshelp=1
   else
