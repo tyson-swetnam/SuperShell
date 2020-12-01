@@ -1,21 +1,62 @@
 #!/usr/bin/bash
-
+#pd addition for ctrl-c
+# function called by trap
+kill_child() {
+    # printf "Killing process      "
+    #tput setaf 1
+    #printf "\rSIGINT caught      "
+    #tput sgr0
+    #sleep 1
+    #printf "\rType a command >>> "
+    echo "Killed Process"
+	print prompt
+}
+trap 'kill_child' SIGINT
+#trap 'other_commands' TSTP
+#trap 'other_commands' SIGTSTP
+#end pd addition
 # Function to get initial variables set up
 init_shell() {
   history -r ~/.script_history
-  trap "goodbye" SIGINT SIGTERM
+ # trap "goodbye" SIGINT SIGTERM
   home=${PWD##*/}
   host=$(hostname -s)
   user=$(whoami)
   curr=""
-  cat $HOME/SuperShell/title.txt
+  #pd_addition for SuperShellHistory
+  SHELL_DIRECTORY="$HOME/SuperShell/"
+  if [ ! -d "$SHELL_DIRECTORY" ]; then
+     mkdir $SHELL_DIRECTORY
+  fi  
+  HISTORY_DIRECTORY="$SHELL_DIRECTORY/SuperShellHistory"
+  if [ ! -d "$HISTORY_DIRECTORY" ]; then
+     mkdir $HISTORY_DIRECTORY
+  fi 
+  #end pd addition
+  #pd addition, should make this a procedure
+  TITLE_FILE=$HOME/SuperShell/title.txt
+  if test -f "$TITLE_FILE"; then
+    cat $TITLE_FILE
+  fi
+  #cat $HOME/SuperShell/title.txt
+  #end pd addition
   d=$(date +%Y-%m-%d)
   testForDate
   DOW=$(date +"%u")
-  welcome_stat_param=$(cat ${HOME}/SuperShell/StatParam/welcomestatparam.txt)
-  mail_stat_param=$(cat ${HOME}/SuperShell/StatParam/mailstatparam.txt)
-  echo ${welcome_stat_param}
-  ${welcome_stat_param}
+  #pd addition
+  WELCOME_FILE=${HOME}/SuperShell/StatParam/welcomestatparam.txt
+  if test -f "$WELCOME_FILE"; then
+    welcome_stat_param=$(cat $WELCOME_FILE)
+  fi
+  MAIL_FILE=${HOME}/SuperShell/StatParam/mailstatparam.txt
+  if test -f "$MAIL_FILE"; then
+    mail_stat_param=$(cat $MAIL_FILE)
+  fi
+  #welcome_stat_param=$(cat ${HOME}/SuperShell/StatParam/welcomestatparam.txt)
+  #mail_stat_param=$(cat ${HOME}/SuperShell/StatParam/mailstatparam.txt)
+  #end pd addition
+  # echo ${welcome_stat_param}
+  # ${welcome_stat_param}
   echo "Learn more about SuperShell by entering 'sinfo'"
   # this is for sending an email on a specific day of the week (1-7) for (Mon-Sun)
   if [ ${DOW} == 6 ]; then
@@ -72,14 +113,14 @@ goodbye (){
    history -w ~/.script_history
    rm -rf ~/shell/var/tmp
    echo
-   echo "exiting"
+   echo "Exiting SuperShell"
    exit 0
 }
 
 # print prompt
 print_prompt() {
   dir=${PWD##*/}
-  if [[ ${#dir} > 0 ]] && [ $dir = $home ]
+  if [[ ${#dir} > 0 ]] && [ "$dir" = $home ]
   then
     dir="~"
   fi
@@ -89,7 +130,7 @@ print_prompt() {
 # test to see if command is a screen based editor
 # set interactivet to 1 if true, 0 if false
 testForInteractive() {
-  if grep -c ${params[0]} $HOME/.interactive.txt > 0
+  if [ $(grep -c ${params[0]} $HOME/.interactive.txt) -gt 0 ]
   then
     interactive=1
   else 
@@ -98,7 +139,7 @@ testForInteractive() {
 }
 
 testForExecute() {
-  if grep -c ${params[0]} $HOME/.execute.txt > 0
+  if [ $(grep -c ${params[0]} $HOME/.execute.txt) -gt 0 ]
   then
     execute=1
   else 
@@ -121,7 +162,7 @@ testForFileAndLog() {
 # screen based editors like vim/pico/nano
 ExecuteAndUpdateStats() {
   # echo "exec and update stats " + "$COMMANDS"
-  cp ${params[1]} tmp_${params[1]} 2>/dev/null
+  cp ${params[1]} .tmp_${params[1]} 2>/dev/null
   start=`date +%s`
   exists=$(cat ${params[1]} 2>/dev/null)
   if [[ ${#exists} != 0 ]]
@@ -207,6 +248,7 @@ update_stats() {
   export LAST_STDOUT="$stdout"
   export LAST_FILENAME="$justName"
   export LAST_COMMAND="${params[0]}"
+  export LAST_FULL_COMMAND="$COMMANDS"
 
   ti=$(date +%F:%H:%M)
   if [ "$interactive" == 0 ]
@@ -288,28 +330,52 @@ executeCommand() {
 # the supershell history
 # NOTE: Check comment below relating to commented out script line
 interactiveExecute() {
+ # echo "Executing command: $COMMANDS" 
   testForInteractive
   if [ "$interactive" == 0 ]
   then
+    #echo $COMMANDS
     if [ "${params[0]}" = "cd" ] || [ "${params[0]}" = "exit" ]; then
+	    #pd addition
+
         eval "$COMMANDS" > $HOME/stdout.txt 2>$HOME/stderr.txt
+	cat $HOME/stdout.txt 2>/dev/null
+		#eval "$COMMANDS" 2>$HOME/stderr.txt | tee $HOME/stdout.txt 
+		#end pd addition
+
     else
       # NOTE: This needs to be changed. This causes output of a program
       # to not get printed out until all input is received. This is due
       # to the stderr redirection. Can be solved on linux machines with
       # the commented out script command below. Should be relatively simple
       # to port to mac.
-      eval "$COMMANDS" > $HOME/stdout.txt 2>$HOME/stderr.txt
+	  #start pd addition
+      #eval "$COMMANDS" > $HOME/stdout.txt 2>$HOME/stderr.txt
+	  #end pd addition
+	eval "$COMMANDS" 2>$HOME/stderr.txt | tee $HOME/stdout.txt 
+
+	  #EVAL_RESULT=eval "$COMMANDS" 2>$HOME/stderr.txt | tee $HOME/stdout.txt 
+	  #echo $EVAL_RESULT
    # script -q -c "$COMMANDS 2>$HOME/stderr.txt" -f /dev/null | tee       $HOME/stdout.txt
     fi 
-    cat $HOME/stdout.txt 2>/dev/null
-    cat $HOME/stderr.txt 2>/dev/null
+	#pd addition
+    #cat $HOME/stdout.txt 2>/dev/null
+	EVAL_ERROR=$(<$HOME/stderr.txt)
+	if [ -n "$EVAL_ERROR" ]; then
+	    #TRUNCATED_ERROR=${EVAL_ERROR/"offline.sh: line"/""}
+		TRUNCATED_ERROR=$(echo "$EVAL_ERROR" | sed "s/.*offline.sh: line ...: //")
+		#echo $EVAL_ERROR
+		echo $TRUNCATED_ERROR
+	fi
+    #cat $HOME/stderr.txt 2>/dev/null
+	#end pd addition
+
   else
     ExecuteAndUpdateStats
   fi
   testForFileAndLog
   update_stats
-  if grep -c "YES" $HOME/.supershellhelp.txt > 0 
+  if [ $(grep -c "YES" $HOME/.supershellhelp.txt) -gt 0 ]
   then
     sshelp=1
   else
@@ -321,8 +387,14 @@ interactiveExecute() {
     if [ "$sshelp" == 1 ]; then
       recommend
     else
-      cat $HOME/.supershellhelpmessage.txt
-    fi
+	  #start pd addition
+	  HELP_MESSAGE_FILE=$HOME/.supershellhelpmessage.txt
+	  if [ -f $HELP_MESSAGE_FILE ]; then
+         #cat $HOME/.supershellhelpmessage.txt
+		 cat $HELP_MESSAGE_FILE
+	  fi
+	  #end pd addition
+   fi
   fi
   
 }
@@ -1115,6 +1187,34 @@ while :
   elif [ ${params[0]} = "sundo" ]
     then
     $COMMANDS
+  #pd addition
+  elif [ ${params[0]} = "exit" ]
+    then
+	goodbye
+  #end pd addition
+   elif [ ${params[0]} = "!!" ]
+     then
+       if [ -z $LAST_FULL_COMMAND ]
+       then
+         echo "No previous command"
+       else
+	     # This can return an error, let assume it does not
+         ${LAST_FULL_COMMAND}
+       fi
+   elif [ ${params[0]:0:1} = "!" ]
+     then
+       len=${#params[0]}
+       [ $len -gt 0 ] && previousCommand=${params[0]:1:$len}
+       #echo $previousCommand
+       #echo $(history)
+       lastMatchedCommand=$(history | grep "^ *[[:digit:]]\+ *$previousCommand" | tail -1 | cut -c 8- )
+       echo $lastMatchedCommand
+       if [ -z "$lastMatchedCommand" ]
+       then
+         echo "No matching command"
+       else
+         $lastMatchedCommand
+       fi
   else
     executeCommand 0
   fi
