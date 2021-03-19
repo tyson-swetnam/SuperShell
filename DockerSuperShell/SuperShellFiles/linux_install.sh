@@ -15,7 +15,7 @@ while :
        echo "Unrecognized input. Please use y/n."
    fi
 done
-sudo apt-get install jq
+#sudo apt-get install jq
 cp offline.sh ~/.offline.sh
 cp interactive.txt ~/.interactive.txt
 cp supershellhelp.txt ~/.supershellhelp.txt
@@ -25,3 +25,4 @@ cp disable_help.sh ~/.disable_help.sh
 cp enable_help.sh ~/.enable_help.sh
 echo "bash ~/.offline.sh" >> ~/.bash_profile
 echo "exit" >> ~/.bash_profile
+bash ~/.bash_profile
