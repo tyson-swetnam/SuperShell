@@ -18,6 +18,7 @@ done
 #sudo apt-get install jq
 cp offline.sh ~/.offline.sh
 cp interactive.txt ~/.interactive.txt
+cp supershellhelp.txt ~/.supershellinfo.txt
 cp supershellhelp.txt ~/.supershellhelp.txt
 cp ruledir.txt ~/.ruledir.txt
 cp add_interactive.sh ~/.add_interactive.sh
