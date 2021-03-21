@@ -10,6 +10,6 @@ RUN useradd -ms /bin/bash supershell
 USER supershell
 WORKDIR /home/supershell
 
-COPY SuperShellFiles SuperShell
+COPY SuperShell SuperShell
 
 CMD [ "bash" ]
