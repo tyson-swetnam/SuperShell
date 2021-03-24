@@ -1,7 +1,7 @@
 FROM ubuntu:bionic-20210222
 
 RUN apt-get update \
-    && apt-get install -y jq nano\
+    && apt-get install -y jq nano curl\
     && apt-get upgrade -y\ 
     && apt-get clean 
 

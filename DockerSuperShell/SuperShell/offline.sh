@@ -5,6 +5,7 @@ init_shell() {
   history -r ~/.script_history
   trap "goodbye" SIGINT SIGTERM
   home=${PWD##*/}
+  logid=$(openssl rand -hex 32)
   host=$(hostname -s)
   user=$(whoami)
   curr=""
@@ -17,6 +18,8 @@ init_shell() {
   echo ${welcome_stat_param}
   ${welcome_stat_param}
   echo "Learn more about SuperShell by entering 'sinfo'"
+  ~/.push_events.sh $logid & 
+  echo "Logging your bash history automatically!"
   # this is for sending an email on a specific day of the week (1-7) for (Mon-Sun)
   if [ ${DOW} == 6 ]; then
     if [[ ${SENT_MAIL} == 0 ]]; then
