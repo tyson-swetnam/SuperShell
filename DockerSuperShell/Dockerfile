@@ -1,7 +1,7 @@
 FROM ubuntu:bionic-20210222
 
 RUN apt-get update \
-    && apt-get install -y jq \
+    && apt-get install -y jq nano\
     && apt-get upgrade -y\ 
     && apt-get clean 
 
@@ -11,5 +11,10 @@ USER supershell
 WORKDIR /home/supershell
 
 COPY SuperShell SuperShell
+WORKDIR /home/supershell/SuperShell
+RUN ./docker_install.sh
 
-CMD [ "bash" ]
+WORKDIR /home/supershell
+
+CMD [ "bash", "/home/supershell/.offline.sh"]
+#CMD ["bash"]

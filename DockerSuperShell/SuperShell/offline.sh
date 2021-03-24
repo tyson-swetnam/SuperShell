@@ -86,10 +86,14 @@ print_prompt() {
   prompt="$host:$dir $user$"
 }
 
+countinteractive() {
+  echo $(grep -c ${params[0]} $HOME/.interactive.txt)
+}
+
 # test to see if command is a screen based editor
 # set interactivet to 1 if true, 0 if false
 testForInteractive() {
-  if grep -c ${params[0]} $HOME/.interactive.txt > 0
+  if [ "$(countinteractive)" != "0" ];
   then
     interactive=1
   else 
@@ -97,8 +101,12 @@ testForInteractive() {
   fi
 }
 
+countexecute() {
+  echo $(grep -c ${params[0]} $HOME/.execute.txt)
+}
+
 testForExecute() {
-  if grep -c ${params[0]} $HOME/.execute.txt > 0
+  if [ "$(countexecute)" != "0" ];
   then
     execute=1
   else 
@@ -282,6 +290,10 @@ executeCommand() {
   fi
 }
 
+counthelp() {
+  echo $(grep -c "YES" $HOME/.supershellhelp.txt)
+}
+
 # execute inputted command and update history.
 # test to see if command is a screen based editor like vim or a
 # normal command. In either case execute the command then update
@@ -309,7 +321,7 @@ interactiveExecute() {
   fi
   testForFileAndLog
   update_stats
-  if grep -c "YES" $HOME/.supershellhelp.txt > 0 
+  if [ "$(counthelp)" != "0" ];
   then
     sshelp=1
   else
