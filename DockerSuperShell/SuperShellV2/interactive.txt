@@ -1,0 +1,5 @@
+vim
+pico
+nano
+vi
+subl

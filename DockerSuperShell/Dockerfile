@@ -10,7 +10,7 @@ RUN useradd -ms /bin/bash supershell
 USER supershell
 WORKDIR /home/supershell
 
-COPY SuperShell SuperShell
+COPY SuperShellV2 SuperShell
 WORKDIR /home/supershell/SuperShell
 RUN ./docker_install.sh
 
