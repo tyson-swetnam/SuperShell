@@ -167,6 +167,7 @@ ExecuteAndUpdateStats() {
   # echo "exec and update stats " + "$COMMANDS"
   cp ${params[1]} .tmp_${params[1]} 2>/dev/null
   start=`date +%s`
+  #allow for the general case of doing "nano" with no arguments. 
   if [[ ${params[1]} != "" ]]
   then 
     exists=$(cat ${params[1]} 2>/dev/null)
