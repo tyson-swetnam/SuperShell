@@ -167,20 +167,29 @@ ExecuteAndUpdateStats() {
   # echo "exec and update stats " + "$COMMANDS"
   cp ${params[1]} .tmp_${params[1]} 2>/dev/null
   start=`date +%s`
-  exists=$(cat ${params[1]} 2>/dev/null)
-  if [[ ${#exists} != 0 ]]
-  then
-    old_wc_res=$(wc -lw < ${params[1]})
-    old_words=$(echo $old_wc_res | awk '{print $2}')
-    old_lines=$(echo $old_wc_res | awk '{print $1}')
-  else
-    old_words=0
-    old_lines=0
+  if [[ ${params[1]} != "" ]]
+  then 
+    exists=$(cat ${params[1]} 2>/dev/null)
+    if [[ ${#exists} != 0 ]]
+    then
+      old_wc_res=$(wc -lw < ${params[1]})
+      old_words=$(echo $old_wc_res | awk '{print $2}')
+      old_lines=$(echo $old_wc_res | awk '{print $1}')
+    else
+      old_words=0
+      old_lines=0
+    fi
   fi
   eval "$COMMANDS"
-  new_wc_res=$(wc -lw < ${params[1]})
-  new_words=$(echo $new_wc_res | awk '{print $2}')
-  new_lines=$(echo $new_wc_res | awk '{print $1}')
+  if [[ ${params[1]} == "" ]]
+  then
+    new_words=0
+    new_lines=0
+  else
+    new_wc_res=$(wc -lw < ${params[1]})
+    new_words=$(echo $new_wc_res | awk '{print $2}')
+    new_lines=$(echo $new_wc_res | awk '{print $1}')
+  fi
   end=`date +%s`
   runtime=$((end-start))
 }
