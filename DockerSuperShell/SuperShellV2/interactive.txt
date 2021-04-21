@@ -3,3 +3,4 @@ pico
 nano
 vi
 subl
+rm

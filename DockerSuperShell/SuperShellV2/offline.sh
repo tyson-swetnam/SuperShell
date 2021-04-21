@@ -168,7 +168,7 @@ ExecuteAndUpdateStats() {
   cp ${params[1]} .tmp_${params[1]} 2>/dev/null
   start=`date +%s`
   #allow for the general case of doing "nano" with no arguments. 
-  if [[ ${params[1]} != "" ]]
+  if [[ ${params[1]} != "" ]] && [[ ${params[1]} != "-"* ]]
   then 
     exists=$(cat ${params[1]} 2>/dev/null)
     if [[ ${#exists} != 0 ]]
@@ -182,7 +182,7 @@ ExecuteAndUpdateStats() {
     fi
   fi
   eval "$COMMANDS"
-  if [[ ${params[1]} == "" ]]
+  if [[ ${params[1]} == "" ]] || [[ ${params[1]} == "-"* ]]
   then
     new_words=0
     new_lines=0
