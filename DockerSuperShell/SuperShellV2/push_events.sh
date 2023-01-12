@@ -16,12 +16,23 @@ do
     logtype="Bash"
     machineid=$(hostname -s)
     machineid=${machineid::-4}
+    sessionid="Unknown Cyverse ID"
+    homeLocation='/home/jovyan/data-store/home/*'
+    for FILEPATHS in $homeLocation; 
+    do 
+        ITEM=$(basename "$FILEPATHS")
+        if [[ "$ITEM" != "shared" ]];
+        then
+            sessionid="$ITEM" 
+        fi
+    done
     log=$total
     final_log=$(echo $(jq --arg logid "$logid" --arg courseid "$courseid" \
-                        --arg machineid "$machineid" --arg logtype "$logtype" \
+                        --arg sessionid "$sessionid" --arg machineid "$machineid" --arg logtype "$logtype" \
                         --argjson log "$log" -n '{ "body" :  
                         { log_id : $logid,
                         machine_id : $machineid,
+                        session_id : $sessionid,
                         course_id : $courseid,
                         log_type : $logtype,
                         log : $log
