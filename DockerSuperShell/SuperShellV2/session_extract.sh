@@ -1,11 +1,15 @@
 sessionid="Unknown Cyverse ID"
-homeLocation='DirectoryPath/*'
-for FILEPATHS in $homeLocation; 
-do 
-    ITEM=$(basename "$FILEPATHS")
-    if [[ "$ITEM" != "shared" ]];
-    then
-        sessionid="$ITEM" 
-    fi
-done
+homeLocation='/home/jovyan/data-store/home'
+if [[ -d "$homeLocation" ]];
+then
+    toCheck="${homeLocation}/*"
+    for FILEPATHS in $toCheck; 
+    do 
+        ITEM=$(basename "$FILEPATHS")
+        if [[ "$ITEM" != "shared" ]];
+        then
+            sessionid="$ITEM" 
+        fi
+    done
+fi
 echo $sessionid

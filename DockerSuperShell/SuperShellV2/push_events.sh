@@ -17,15 +17,19 @@ do
     machineid=$(hostname -s)
     machineid=${machineid::-4}
     sessionid="Unknown Cyverse ID"
-    homeLocation='/home/jovyan/data-store/home/*'
-    for FILEPATHS in $homeLocation; 
-    do 
-        ITEM=$(basename "$FILEPATHS")
-        if [[ "$ITEM" != "shared" ]];
-        then
-            sessionid="$ITEM" 
-        fi
-    done
+    homeLocation='/home/jovyan/data-store/home'
+    if [[ -d "$homeLocation" ]];
+    then
+        toCheck="${homeLocation}/*"
+        for FILEPATHS in $toCheck; 
+        do 
+            ITEM=$(basename "$FILEPATHS")
+            if [[ "$ITEM" != "shared" ]];
+            then
+                sessionid="$ITEM" 
+            fi
+        done
+    fi
     log=$total
     final_log=$(echo $(jq --arg logid "$logid" --arg courseid "$courseid" \
                         --arg sessionid "$sessionid" --arg machineid "$machineid" --arg logtype "$logtype" \
