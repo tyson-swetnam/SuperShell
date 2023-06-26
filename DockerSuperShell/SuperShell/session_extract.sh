@@ -1,5 +1,5 @@
 sessionid="Unknown Cyverse ID"
-homeLocation='/home/jovyan/data-store/home'
+homeLocation='/home/jovyan/data-store/user'
 if [[ -d "$homeLocation" ]];
 then
     toCheck="${homeLocation}/*"
