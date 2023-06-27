@@ -17,7 +17,7 @@ do
     machineid=$(hostname -s)
     machineid=${machineid::-4}
     sessionid="Unknown Cyverse ID"
-    homeLocation='/home/jovyan/data-store/user'
+    homeLocation='/home/jovyan/data-store/home/$IPLANT_USER'
     if [[ -d "$homeLocation" ]];
     then
         toCheck="${homeLocation}/*"
